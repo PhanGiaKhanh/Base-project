@@ -1,0 +1,20 @@
+﻿*****======================== Create Exception "cannot find product" =======================================
+B1 >>  model/ResponseObject.java
+	public class ResponseObject {
+		private String status;
+		private String message;
+		private Object data;
+
+		....
+	}
+B2 >> Controller
+	// Let's return an object with: data, message, status
+	public ResponseEntity<ResponseObject> findByID(@PathVariable Long id) {
+		Optional<Product> foundProduct = repository.findById(id);
+		return foundProduct.isPresent()
+			? ResponseEntity.status(HttpStatus.OK)
+	`			.body(new ResponseObject("OK", "Query product successfully", foundProduct))
+			: ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(new ResponseObject("false", "Cannot find product with id = " + id, ""));
+
+	}
