@@ -2,6 +2,7 @@ package com.example.springboot.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,12 +18,11 @@ import com.example.springboot.service.IStorageService;
 @Controller
 @RequestMapping(path = "/api/v1/FileUpload")
 public class FileUploadController {
-	//Injectt Storage Service here
+	// Injectt Storage Service here
 	@Autowired
 	private IStorageService iStorageService;
-	
-	
-	//This controller receive file/image from client
+
+	// This controller receive file/image from client
 	@PostMapping("")
 	public ResponseEntity<ResponseObject> uploadFile(@RequestParam("file") MultipartFile file) {
 		try {
@@ -30,17 +30,22 @@ public class FileUploadController {
 			String generatedFileName = iStorageService.storeFile(file);
 			return ResponseEntity.status(HttpStatus.OK)
 					.body(new ResponseObject("OK", "upload file successfully", generatedFileName));
-			// ex: 870e84e08ab64ef78a9d02e7634c789f.jpg => how to open this file in Web Browser? 
+			// ex: 870e84e08ab64ef78a9d02e7634c789f.jpg => how to open this file in Web
+			// Browser?
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
 					.body(new ResponseObject("fale", e.getMessage(), ""));
 		}
 	}
-	
-	// get image's url 
+
+	// get image's url
 	@GetMapping("/files/{fileName:.+}")
 	public ResponseEntity<byte[]> readDetailFile(@PathVariable String fileName) {
-		
-		return null;
+		try {
+			byte[] bytes = iStorageService.readFileContent(fileName);
+			return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bytes);
+		} catch (Exception e) {
+			return ResponseEntity.noContent().build();
+		}
 	}
-}
+};

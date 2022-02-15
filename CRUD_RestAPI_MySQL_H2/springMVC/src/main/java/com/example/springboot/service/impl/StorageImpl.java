@@ -1,6 +1,5 @@
 package com.example.springboot.service.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -12,7 +11,10 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.springboot.service.IStorageService;
@@ -37,6 +39,15 @@ public class StorageImpl implements IStorageService {
 		return Arrays.asList(array).contains(fileExtenstion.trim().toLowerCase());
 	}
 
+
+	private void throwExeption(String string) {
+		throw new RuntimeException(string);
+	}
+
+	private void throwExeption(String string, IOException e) {
+		throw new RuntimeException(string, e);
+	}
+	
 	@Override
 	public String storeFile(MultipartFile file) {
 		try {
@@ -74,14 +85,6 @@ public class StorageImpl implements IStorageService {
 		return null;
 	}
 
-	private void throwExeption(String string) {
-		throw new RuntimeException(string);
-	}
-
-	private void throwExeption(String string, IOException e) {
-		throw new RuntimeException(string, e);
-	}
-
 	@Override
 	public Stream<Path> loadAll() {
 		return null;
@@ -89,7 +92,20 @@ public class StorageImpl implements IStorageService {
 
 	@Override
 	public byte[] readFileContent(String fileName) {
-		return null;
+		try {
+			// Get resource >> muốn xem return byte / muốn tải về return data resource
+			Path file = storageFolder.resolve(fileName);
+			Resource resource = new UrlResource(file.toUri());
+			if (resource.exists() || resource.isReadable()) {
+				return StreamUtils.copyToByteArray(resource.getInputStream());
+			} else {
+				throw new RuntimeException(
+                        "Could not read file: " + fileName);
+            }
+        }
+        catch (IOException exception) {
+            throw new RuntimeException("Could not read file: " + fileName, exception);
+        }
 	}
 
 	@Override
