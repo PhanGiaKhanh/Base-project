@@ -87,7 +87,16 @@ public class StorageImpl implements IStorageService {
 
 	@Override
 	public Stream<Path> loadAll() {
-		return null;
+		try {
+            //	list all files in storageFolder
+            //	How to fix this ?
+            return Files.walk(this.storageFolder, 1)
+                    .filter(path -> !path.equals(this.storageFolder) && !path.toString().contains("._"))
+                    .map(this.storageFolder::relativize);
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Failed to load stored files", e);
+        }
 	}
 
 	@Override
