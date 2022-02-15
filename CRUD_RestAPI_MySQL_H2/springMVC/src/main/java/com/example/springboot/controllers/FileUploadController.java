@@ -60,10 +60,9 @@ public class FileUploadController {
 		try {
 			List<String> urls = iStorageService.loadAll().map(path -> {
 				// convert fileName to url(send request "readDetailFile")
-				String urlPath = MvcUriComponentsBuilder
+				return MvcUriComponentsBuilder
 						.fromMethodName(FileUploadController.class, "readDetailFile", path.getFileName().toString())
 						.build().toUri().toString();
-				return urlPath;
 			}).collect(Collectors.toList());
 			return ResponseEntity.ok(new ResponseObject("ok", "List files successfully", urls));
 		} catch (Exception exception) {
