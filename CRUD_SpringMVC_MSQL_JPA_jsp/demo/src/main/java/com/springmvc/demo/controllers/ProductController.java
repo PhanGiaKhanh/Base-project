@@ -93,11 +93,17 @@ public class ProductController {
 		} else {
 			newProducId = "P" + (number + 1);
 		}
-		
-		
+
 		product.setProductId(newProducId);
 		System.err.println(lastId);
 		productServcie.save(product);
 		return "redirect:/categories";
+	}
+	
+	// Delete 
+	@PostMapping("delete/{id}")
+	public String removeProductById(@PathVariable(name = "id") String productId) {
+		productServcie.delete(productId);
+		return "redirect:/products";
 	}
 }

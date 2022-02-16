@@ -1,5 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>  
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%> 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,7 +31,13 @@
                     <td>${product.formatPrice}</td>
                     <td>${product.description}</td>
                     <td>
-                        <a href="/products/changeCategory/${product.productId}">Assign this product to other Category</a>
+                        <a href="/products/changeCategory/${product.productId}">Edit</a>
+                        <form:form method="POST" 
+                          action="/products/delete/${product.productId}"
+                          onsubmit="return confirm('Are you sure want to delete this Product?') ? true : false"                        
+                          >
+                          <button type="submit">Del</button>
+                        </form:form>
                     </td>
                   </tr>
             </c:forEach>
