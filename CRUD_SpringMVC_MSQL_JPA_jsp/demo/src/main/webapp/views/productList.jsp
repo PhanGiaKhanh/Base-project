@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>  
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +11,7 @@
 <body>
     <h1>Product list by CategoryID</h1>
     <table class="table table-striped table-dark" border="1" >
+    <caption></caption>
         <thead>
           <tr>
             <th scope="col">ID</th>
@@ -26,15 +28,15 @@
                     <th scope="row">${product.productId}</th>
                     <td>${product.productName}</td>
                     <td>${product.categoryId}</td>
-                    <td>${product.price}</td>
+                    <td>${product.formatPrice}</td>
                     <td>${product.description}</td>
                     <td>
-                        <a href="#">Edit</a>
-                        <a href="#">Delete</a>
+                        <a href="/products/changeCategory/${product.productId}">Assign this product to other Category</a>
                     </td>
                   </tr>
             </c:forEach>
         </tbody>
       </table>
+      <a href="/categories">Back All Categories</a>
 </body>
 </html>

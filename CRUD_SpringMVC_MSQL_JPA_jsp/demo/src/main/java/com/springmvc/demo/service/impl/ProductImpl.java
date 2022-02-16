@@ -34,4 +34,9 @@ public class ProductImpl implements ProductServcie {
 		productRepository.deleteById(id);
 	}
 
+	@Override
+	public List<Product> findByCategoryId(String categoryId) {
+		return productRepository.findByCategoryId(categoryId);
+	}
+
 }

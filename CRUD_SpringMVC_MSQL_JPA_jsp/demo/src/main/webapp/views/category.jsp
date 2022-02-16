@@ -25,12 +25,12 @@
                     <td>${category.categoryName}</td>
                     <td>${category.description}</td>
                     <td>
-                        <a href="#">Edit</a>
-                        <a href="#">Delete</a>
+                        <a href="/products/${category.categoryId}">Show list products</a>
                     </td>
                   </tr>
             </c:forEach>
         </tbody>
       </table>
+      <a href="/products">Back All Products</a>
 </body>
 </html>
