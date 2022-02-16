@@ -9,4 +9,5 @@ import com.springmvc.demo.models.Product;
 @Service
 public interface ProductServcie extends GenericService<Product>{
 	List<Product> findByCategoryId(String categoryId);
+	String getLastId();
 }

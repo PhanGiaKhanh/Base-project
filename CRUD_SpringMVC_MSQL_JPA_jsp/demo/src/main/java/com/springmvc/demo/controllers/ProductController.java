@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -65,5 +66,38 @@ public class ProductController {
 			productServcie.save(product);
 		}
 		return "redirect:/products/" + product.getCategoryId();
+	}
+
+	// show page insert Product
+	@GetMapping("/insert")
+	public ModelAndView changeCategory() {
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.setViewName("insertProduct");
+		modelAndView.addObject("categories", categoryService.findAll());
+		modelAndView.addObject("product", new Product());
+		return modelAndView;
+	}
+
+	// update Category for Product
+	@PostMapping("/insert")
+	public String insertProduct(@Valid @ModelAttribute("product") Product product, BindingResult result) {
+		System.err.println("hhellooooooooooooooooooo");
+		if (result.hasErrors()) {
+			return "insertProduct";
+		}
+		String lastId = productServcie.getLastId();
+		int number = Integer.parseInt(lastId.split("P")[1]);
+		String newProducId = null;
+		if (number < 1000) {
+			newProducId = "P0" + (number + 1);
+		} else {
+			newProducId = "P" + (number + 1);
+		}
+		
+		
+		product.setProductId(newProducId);
+		System.err.println(lastId);
+		productServcie.save(product);
+		return "redirect:/categories";
 	}
 }

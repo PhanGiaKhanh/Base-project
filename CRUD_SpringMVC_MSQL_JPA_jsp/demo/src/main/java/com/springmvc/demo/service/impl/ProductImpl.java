@@ -39,4 +39,9 @@ public class ProductImpl implements ProductServcie {
 		return productRepository.findByCategoryId(categoryId);
 	}
 
+	@Override
+	public String getLastId() {
+		return productRepository.getLastId();
+	}
+
 }

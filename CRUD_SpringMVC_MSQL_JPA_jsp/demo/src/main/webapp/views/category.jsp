@@ -31,6 +31,7 @@
             </c:forEach>
         </tbody>
       </table>
+      <a href="/products/insert">Insert Product</a><br>
       <a href="/products">Back All Products</a>
 </body>
 </html>
