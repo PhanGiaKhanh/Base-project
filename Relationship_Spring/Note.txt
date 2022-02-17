@@ -23,3 +23,23 @@ public class Address {
 =================================================
 B2>> 	One-to-Many Relationship
 ---------------------------------------------------------
+@Table(name = "libraries")
+public class Library {
+	...
+	@OneToOne(cascade = CascadeType.ALL)				#***#
+	@JoinColumn(name = "address_id", referencedColumnName = "id")
+	private Address address;
+	@OneToMany(mappedBy = "library", cascade = CascadeType.ALL )	#***#
+	@JsonBackReference
+	private List<Book> books;
+	...
+}
+@Table(name = "books")
+public class Book {
+	...
+	@ManyToOne
+	@JoinColumn(name = "library_id")
+	private Library library;
+	...
+}
+## Phải đảm bảo cascade = CascadeType.ALL ở Address và List<Book> mới xóa được

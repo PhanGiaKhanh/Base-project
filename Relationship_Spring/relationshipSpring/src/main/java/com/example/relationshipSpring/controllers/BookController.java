@@ -14,39 +14,40 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.relationshipSpring.dto.ResponseObject;
-import com.example.relationshipSpring.models.Library;
-import com.example.relationshipSpring.repositories.LibraryRepository;
+import com.example.relationshipSpring.models.Book;
+import com.example.relationshipSpring.repositories.BookRepository;
 
 @RestController
-@RequestMapping("/api/v1/libraries")
-public class LibraryController {
+@RequestMapping("/api/v1/books")
+public class BookController {
 	@Autowired
-	private LibraryRepository libraryRepository;
+	private BookRepository bookRepository;
 
 	@GetMapping("")
-	public ResponseEntity<List<Library>> getAll(){
-		return ResponseEntity.ok(libraryRepository.findAll());
+	public ResponseEntity<List<Book>> getAll(){
+		return ResponseEntity.ok(bookRepository.findAll());
 	}
 
 	@PostMapping("insert")
-	public ResponseEntity<ResponseObject> insertLibrary(@RequestBody Library library) {
+	public ResponseEntity<ResponseObject> insertBook(@RequestBody Book book) {
 		try {
 			return ResponseEntity
-					.ok(new ResponseObject(true, "Insert library successfully", libraryRepository.save(library)));
+					.ok(new ResponseObject(true, "Insert Book successfully", bookRepository.save(book)));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-					.body(new ResponseObject(false, "Insert library failed", ""));
+					.body(new ResponseObject(false, "Insert book failed", ""));
 		}
 	}
 
 	@DeleteMapping("delete/{id}")
-	public ResponseEntity<ResponseObject> removeLibrary(@PathVariable int id) {
+	public ResponseEntity<ResponseObject> removeBook(@PathVariable int id) {
 		try {
-			libraryRepository.deleteById(id);
-			if(libraryRepository.findById(id).isPresent()) {
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseObject(false, "Delete library failed", ""));
+			bookRepository.deleteById(id);
+			if (bookRepository.findById(id).isPresent()) {
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+						.body(new ResponseObject(false, "Insert book failed", ""));
 			}
-			return ResponseEntity.ok(new ResponseObject(true, "Delete library successfully", ""));
+			return ResponseEntity.ok(new ResponseObject(true, "Delete Book successfully", ""));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject(false, "Id not exists", ""));
 		}
