@@ -1,0 +1,4 @@
+@Modifying
+@Transactional
+@Query (value = "INSERT INTO libraries (name, address_id) VALUES ( ?1 , ?2 )", nativeQuery = true)
+void insertLibrary(String name, String id);
