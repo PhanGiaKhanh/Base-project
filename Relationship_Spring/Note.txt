@@ -1,1 +1,25 @@
 ﻿https://www.baeldung.com/spring-data-jpa-delete
+
+=================================================
+B1 >> 	One-to-One Relationship
+---------------------------------------------------------
+@Table(name = "libraries")
+public class Library {
+	...
+	@OneToOne
+	@JoinColumn(name = "address_id")
+	private Address address;
+	...
+}
+@Table(name = "addresses")
+public class Address {
+	...
+	@OneToOne(mappedBy = "address")
+	@JsonBackReference  ## Chặn không cho Address gọi lại Library  == tránh đệ quy
+	private Library library;
+	...
+}
+
+=================================================
+B2>> 	One-to-Many Relationship
+---------------------------------------------------------

@@ -1,6 +1,5 @@
 package com.example.relationshipSpring.models;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,7 +18,7 @@ public class Library {
 	@Column
 	private String name;
 	@OneToOne
-	@JoinColumn(name = "address_id")
+	@JoinColumn(name = "address_id", referencedColumnName = "id")
 	private Address address;
 
 	public int getId() {
