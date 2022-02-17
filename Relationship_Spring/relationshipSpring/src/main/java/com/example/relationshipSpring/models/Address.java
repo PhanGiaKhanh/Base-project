@@ -19,7 +19,7 @@ public class Address {
 	private int id;
 	@Column(nullable = false)
 	private String location;
-	@OneToOne(mappedBy = "address", cascade = { CascadeType.ALL })
+	@OneToOne(mappedBy = "address", cascade = CascadeType.ALL)
 	@JsonBackReference
 	private Library library;
 

@@ -31,8 +31,9 @@ public class LibraryController {
 	@PostMapping("insert")
 	public ResponseEntity<ResponseObject> insertLibrary(@RequestBody Library library) {
 		try {
+			libraryRepository.insertLibrary(library.getName(), library.getAddress().getId());
 			return ResponseEntity
-					.ok(new ResponseObject(true, "Insert library successfully", libraryRepository.save(library)));
+					.ok(new ResponseObject(true, "Insert library successfully", ""));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
 					.body(new ResponseObject(false, "Insert library failed", ""));
