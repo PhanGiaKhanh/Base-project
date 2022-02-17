@@ -1,7 +1,7 @@
 ﻿https://www.baeldung.com/spring-data-jpa-delete
 
 =================================================
-B1 >> 	One-to-One Relationship
+B1 >> 	One-to-One Relationship		Library > 1 : 1 < Address	<ok create/delete>
 ---------------------------------------------------------
 @Table(name = "libraries")
 public class Library {
@@ -21,7 +21,7 @@ public class Address {
 }
 
 =================================================
-B2>> 	One-to-Many Relationship
+B2>> 	One-to-Many Relationship		Library > 1 : n < Books		<ok create/delete>
 ---------------------------------------------------------
 @Table(name = "libraries")
 public class Library {
@@ -43,3 +43,25 @@ public class Book {
 	...
 }
 ## Phải đảm bảo cascade = CascadeType.ALL ở Address và List<Book> mới xóa được
+
+=================================================
+B2>> 	Many-to-Many Relationship  		Author  > n - n < Book	<ok create/delete>
+---------------------------------------------------------		Author  > n - 1 < Book_author > 1 - n < Book
+@Entity
+public class Author {
+	...
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "book_author", 
+		joinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"), 
+		inverseJoinColumns = @JoinColumn(name = "author_id", referencedColumnName = "id"))
+	private List<Book> books;
+	...
+}
+@Table(name = "books")
+public class Book {
+	...
+	@ManyToMany(mappedBy = "books", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JsonBackReference
+	private List<Author> authors;
+	...
+}
