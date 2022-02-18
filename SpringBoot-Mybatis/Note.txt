@@ -2,5 +2,24 @@
 
 Spring boot - Thymeleaf - Mybatis
 
+// Các thư viện chính 	
+	Web
+	Spring security
+	Thymeleaf
+// Các thư viện xây dụng API
+	Web
+	JWT  -> Authen2 + JWT
+	Spring Security
+	MySQL / Postgresql / Oracal / SQL
+
+============================================
+Security
+---------------------------------------------
+Cách 1: Loại bỏ security
+	<file_application.java>
+		@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
+Cách 2: Config security
+
+
 
 

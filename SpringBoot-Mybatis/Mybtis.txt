@@ -1,0 +1,55 @@
+============================================
+Mybatis
+---------------------------------------------
+https://www.programmersought.com/article/8672121650/
+
+B1 > import library
+	Gradle
+// https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter
+implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.1.3'
+	Maven
+<!-- https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter -->
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <version>2.1.3</version>
+</dependency>
+
+B2 > create package: model / mapper / mapper.sql
+
+B3 > create <generatorMyBatis.xml>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+  <context id="DB2Tables" targetRuntime="MyBatis3">
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+        connectionURL="jdbc:mysql://localhost:3306/<DB_name>"
+        userId="root"
+        password="<DB_password>">
+    </jdbcConnection>
+
+    <javaTypeResolver >
+      <property name="forceBigDecimals" value="false" />
+    </javaTypeResolver>
+
+    <javaModelGenerator targetPackage="<path_of_package_model>" targetProject="<Project_name>"/>
+
+    <sqlMapGenerator targetPackage="<path_of_package_mapper_sql>"  targetProject="<Project_name>/src/main/resources" />
+
+    <javaClientGenerator type="XMLMAPPER" targetPackage="<path_of_package_mapper>"  targetProject="<Project_name>">
+      <property name="enableSubPackages" value="true" />
+    </javaClientGenerator>
+
+    <table tableName="<table_name>" domainObjectName="<class_name>" >
+    ##<table tableName="user" domainObjectName="User" >
+    
+    </table>
+
+  </context>
+</generatorConfiguration>
+
