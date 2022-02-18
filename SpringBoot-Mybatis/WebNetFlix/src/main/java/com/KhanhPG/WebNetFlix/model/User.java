@@ -1,7 +1,5 @@
 package com.KhanhPG.WebNetFlix.model;
 
-import java.util.Date;
-
 public class User {
 
 	/**

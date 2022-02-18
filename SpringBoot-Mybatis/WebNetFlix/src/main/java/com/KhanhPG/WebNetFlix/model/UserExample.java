@@ -1,7 +1,6 @@
 package com.KhanhPG.WebNetFlix.model;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class UserExample {

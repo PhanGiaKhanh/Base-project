@@ -2,7 +2,6 @@ package com.KhanhPG.WebNetFlix.mapper;
 
 import com.KhanhPG.WebNetFlix.model.User;
 import com.KhanhPG.WebNetFlix.model.UserExample;
-import com.KhanhPG.WebNetFlix.model.UserWithBLOBs;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
