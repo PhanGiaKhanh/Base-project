@@ -18,7 +18,8 @@ implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-star
 ---------------------------
 B2 > create package: model / mapper / mapper.sql
 ---------------------------
-B3 > create package: model / mapper / mapper.sql
+B3 > config application.properties
+---------------------------
 #server.port=8080
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.datasource.url=jdbc:mysql://localhost:3306/webnetflix
@@ -26,14 +27,10 @@ spring.datasource.username=root
 spring.datasource.password=12345678
 spring.jpa.hibernate.ddl-auto=update
 
-#mybatis.mapper-locations=classpath:com/KhanhPG/WebNetFlix/mapper/sql/*.xml
-mybatis.mapper-locations=classpath:<path_of_package_mapper_sql>*.xml
+mybatis.mapper-locations=classpath:com/KhanhPG/WebNetFlix/mapper/sql/*.xml
 
-#mybatis.type-aliases-package=com.KhanhPG.WebNetFlix.model
-mybatis.type-aliases-package=<path_of_package_model>
-
----------------------------
-B4 > create <generatorMyBatis.xml>
+mybatis.type-aliases-package=com.KhanhPG.WebNetFlix.model
+B4 > create <generatorMyBatis.xml> in resource
 
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE generatorConfiguration
@@ -43,7 +40,7 @@ B4 > create <generatorMyBatis.xml>
 <generatorConfiguration>
 
   <context id="DB2Tables" targetRuntime="MyBatis3">
-    <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver"
         connectionURL="jdbc:mysql://localhost:3306/<DB_name>"
         userId="root"
         password="<DB_password>">

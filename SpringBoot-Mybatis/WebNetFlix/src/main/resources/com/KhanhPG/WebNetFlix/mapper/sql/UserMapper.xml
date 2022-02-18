@@ -300,4 +300,12 @@
       phone = #{phone,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
+  
+  <select id="getAllUser" resultType="map">
+  	select * from user
+  </select>
+  <select id="getAllUserByName" parameterType="String" resultType="map">
+  	select * from user
+  	where user_name = #{userName}
+  </select>
 </mapper>

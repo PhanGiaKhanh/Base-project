@@ -1,0 +1,69 @@
+﻿============================================
+UserMapper.xml
+**************************************************
+SELECT * FROM user
+**************************************************
+-----------------------------------
+Cách 1:
+### default
+  <resultMap id="BaseResultMap" type="com.KhanhPG.WebNetFlix.model.User">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="full_name" jdbcType="VARCHAR" property="fullName" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="user_password" jdbcType="VARCHAR" property="userPassword" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+  </resultMap>
+### Add
+  <select id="getAllUser" resultMap="BaseResultMap">
+  	select * from user
+  </select>	
+### In <UserMapper.java> add
+  List<User> getAllUser();
+### Controller gọi ra 
+-----------------------------------
+Cách 2: 
+### Add
+  <select id="getAllUser" resultType="map">
+  	select * from user
+  </select>
+### In <UserMapper.java> add
+  List<Map<String, Object>> getAllUser();
+
+**************************************************
+SELECT * FROM user WHERE user_name = ???
+**************************************************
+-----------------------------------
+### Add
+  <select id="getAllUser" parameterType="String" resultType="map">
+  	select * from user
+  	where user_name = #{userName}
+  </select>
+### Add
+   List<Map<String, Object>> getAllUser(String userName);
+
+
+
+**************************************************
+SELECT * FROM user WHERE user_name = ??? AND id = ??? ;
+**************************************************
+-----------------------------------
+### Add
+  <select id="getAllUser" parameterType="Map" resultType="map">
+  	SELECT * FROM user
+  	WHERE user_name = #{userName}
+	AND id = #{userId}
+  </select>
+### Add
+   List<Map<String, Object>> getAllUserMap<String, Object> param);
+### Controller Add
+   Map<String, Object> param = new HashMap<>();
+   param.put("userName", "Khanh12");
+   param.put("userId", "1");
+
+   List<Map<String, Object>> users =userMapper.getAllUser(param);
+
+   for (Map<String, Object> value : users) {
+	System.err.println("Check: " + value.get("full_name"));
+   }
+

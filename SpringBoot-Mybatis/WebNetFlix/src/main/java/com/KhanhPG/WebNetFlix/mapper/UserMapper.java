@@ -3,6 +3,7 @@ package com.KhanhPG.WebNetFlix.mapper;
 import com.KhanhPG.WebNetFlix.model.User;
 import com.KhanhPG.WebNetFlix.model.UserExample;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -75,4 +76,7 @@ public interface UserMapper {
 	 * @mbg.generated  Fri Feb 18 13:54:44 ICT 2022
 	 */
 	int updateByPrimaryKey(User record);
+
+	List<Map<String, Object>> getAllUser();
+	List<Map<String, Object>> getAllUserByName(String userName);
 }
