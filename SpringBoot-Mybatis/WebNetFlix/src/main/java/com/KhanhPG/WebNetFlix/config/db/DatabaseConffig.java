@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
+import com.KhanhPG.WebNetFlix.config.AES;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -25,6 +26,8 @@ public class DatabaseConffig {
 	@Value("${db.datasource.password}")
 	private String password;
 
+	private String secrectKey = "Aa@123";
+	
 	// Connect database
 	@Bean(name = "dataSource")
 	public DataSource dataSource() {
@@ -34,9 +37,9 @@ public class DatabaseConffig {
 		// Hikari mới, nhiều chức năng, có sẵn trong spring boot
 		HikariConfig hikariConfig = new HikariConfig();
 		hikariConfig.setDriverClassName(driverClassName);
-		hikariConfig.setJdbcUrl(urlDB);
-		hikariConfig.setUsername(userName);
-		hikariConfig.setPassword(password);
+		hikariConfig.setJdbcUrl(AES.decrypt(urlDB, secrectKey));
+		hikariConfig.setUsername(AES.decrypt(userName, secrectKey));
+		hikariConfig.setPassword(AES.decrypt(password, secrectKey));
 		return new HikariDataSource(hikariConfig);
 	}
 

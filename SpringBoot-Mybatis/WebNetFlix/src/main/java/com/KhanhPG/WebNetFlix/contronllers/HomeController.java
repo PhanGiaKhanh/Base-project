@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.KhanhPG.WebNetFlix.config.AES;
 import com.KhanhPG.WebNetFlix.mapper.UserMapper;
 import com.KhanhPG.WebNetFlix.model.User;
 import com.KhanhPG.WebNetFlix.model.UserExample;
@@ -28,6 +29,10 @@ public class HomeController {
 		for (Map<String, Object> value : users) {
 			System.err.println("Check: " + value.get("full_name"));
 		}
+
+		System.err.println("URL: "+ AES.encrypt("jdbc:mysql://localhost:3306/webnetflix", "Aa@123"));
+		System.err.println("Password: " + AES.encrypt("12345678", "Aa@123"));
+		System.err.println("Root: " + AES.encrypt("root", "Aa@123"));
 		return modelAndView;
 	}
 	
