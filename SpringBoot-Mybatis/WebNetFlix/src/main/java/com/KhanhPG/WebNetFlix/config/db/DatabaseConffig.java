@@ -1,19 +1,19 @@
-﻿==================================================
-*********************************************************
-3.2 Add the DataSourceConfig.java configuration class
-----------------------
-https://www.programmersought.com/article/8672121650/
-*********************************************************
-application.properties
-*********************************************************
-db.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-db.datasource.url=jdbc:mysql://localhost:3306/webnetflix
-db.datasource.username=root
-db.datasource.password=12345678
+package com.KhanhPG.WebNetFlix.config.db;
 
-*********************************************************
-DatabaseConffig.java
-*********************************************************
+import javax.sql.DataSource;
+
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 @Configuration
 public class DatabaseConffig {
 	@Value("${db.datasource.driver-class-name}")
