@@ -1,0 +1,27 @@
+﻿=======================================================
+***************************************************************
+https://www.journaldev.com/2715/spring-security-example-tutorial
++
+https://spring.io/guides/gs/securing-web/
++
+https://www.javainuse.com/onlineBcrypt	
+***************************************************************
+@Configuration		// Chạy lúc khởi động chương trình
+@EnableWebSecurity  	// Tác động tới Security
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http.authorizeRequests()
+		.antMatchers("/", "/home", "/css/*", "/js/*", "/webfonts/*").permitAll()		
+		// Trang "/", "/home" cho phép vào + chèn css / js / webfonts in file static
+		.anyRequest().authenticated().and()		// Trang khác phải chứng thực
+		.formLogin().loginPage("/login").permitAll();	// Trang "/login" cho phép vào
+
+	}
+}
+
+## Tìm hiểu thêm 
+## AuthenProviderManager: custom sâu hơn về điều kiện đăng nhập
+## ***** API - JWT 
+## ***** staleless: tăng thêm tối ưu? Ram 

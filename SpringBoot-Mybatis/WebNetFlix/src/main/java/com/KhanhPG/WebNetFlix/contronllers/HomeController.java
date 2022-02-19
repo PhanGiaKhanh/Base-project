@@ -46,4 +46,17 @@ public class HomeController {
 		System.err.println("Check kiểm tra: " + users.get(0).getFullName());
 		return modelAndView;
 	}
+
+	
+	@GetMapping("/login")
+	public ModelAndView login() {
+		ModelAndView modelAndView = new ModelAndView("login");
+		modelAndView.addObject("user", new User());
+		return modelAndView;
+	}
+	
+	@GetMapping("/other")
+	public ModelAndView anypage() {
+		return new ModelAndView("otherPage");
+	}
 }
