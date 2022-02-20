@@ -25,7 +25,7 @@ public class DemoSecurityApplication {
 		return new BCryptPasswordEncoder();
 	}
 	
-//	@Bean
+	@Bean
 	CommandLineRunner run(UserService userService) {
 		return args -> {
 			userService.saveRole(new Role(null, "ROLE_USER"));

@@ -1,4 +1,4 @@
-https://www.youtube.com/watch?v=VVn9OG9nfH0&t=360s
+﻿https://www.youtube.com/watch?v=VVn9OG9nfH0&t=360s
 
 https://solveforums.msomimaktaba.com/threads/solved-issue-with-spring-security-with-jwt-token-class-java-lang-string-cannot-be-cast-to-class-org-springframework-security-core-userdetails-user.238968/
 -----------------------------------------------B1-------------------------------------------------------
@@ -98,6 +98,123 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	public User saveUser(User user) {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		return userRepo.save(user);
+	}
+	...
+}
+
+
+-----------------------------------------------B6-------------------------------------------------------
+## Change page login default and ROLE_USER / ROLE_ADMIN
+public class SecurityConfig extends WebSecurityConfigurerAdapter{
+	...
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager());
+		customAuthenticationFilter.setFilterProcessesUrl("/api/login");
+		http.csrf().disable();
+		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		http.authorizeRequests().antMatchers("/api/login/**").permitAll();
+		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
+		http.authorizeRequests().antMatchers(HttpMethod.POST, "/api/user/save/**").hasAnyAuthority("ROLE_ADMIN");
+		http.authorizeRequests().anyRequest().authenticated();
+		http.addFilter(customAuthenticationFilter);
+	}
+	...
+}
+
+-----------------------------------------------B7-------------------------------------------------------
+## Thay đôi TOKEN
+public class CustomAuthorizationFilter extends OncePerRequestFilter {
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		final String PATH_LOGIN = "api/login";
+		final String PATH_REFRESH_TOKEN = "api/token/refresh";
+		if (request.getServletPath().equals(PATH_LOGIN) || request.getServletPath().equals(PATH_REFRESH_TOKEN)) {
+			filterChain.doFilter(request, response);
+		} else {
+			String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+				try {
+					String token = authorizationHeader.substring("Bearer ".length());
+					Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+					JWTVerifier verifier = JWT.require(algorithm).build();
+					DecodedJWT decodedJWT = verifier.verify(token);
+					String username = decodedJWT.getSubject();
+					String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
+					Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+					Arrays.stream(roles).forEach(role -> {
+						authorities.add(new SimpleGrantedAuthority(role));
+					});
+					UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+							username, null, authorities);
+					SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+					filterChain.doFilter(request, response);
+				} catch (Exception e) {
+					System.err.println("Error logging in: {} " + e.getMessage());
+					response.setHeader("error", e.getMessage());
+					response.setStatus(HttpStatus.FORBIDDEN.value());
+					// response.sendError(HttpStatus.FORBIDDEN.value());
+					Map<String, String> error = new HashMap<>();
+					error.put("error_message", e.getMessage());
+					response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+					new ObjectMapper().writeValue(response.getOutputStream(), error);
+				}
+			} else {
+				filterChain.doFilter(request, response);
+			}
+		}
+	}
+}
+-----------------------------------------
+public class SecurityConfig extends WebSecurityConfigurerAdapter{
+	...
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		...
+		http.authorizeRequests().antMatchers("/api/login/**", "/api/token/refresh").permitAll();
+		...
+	}
+	...
+}
+
+public class UserResource {
+	...
+	@GetMapping("/token/refresh")
+	public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws StreamWriteException, DatabindException, IOException {
+		String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			try {
+				String refreshToken = authorizationHeader.substring("Bearer ".length());
+				Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+				JWTVerifier verifier = JWT.require(algorithm).build();
+				DecodedJWT decodedJWT = verifier.verify(refreshToken);
+				String username = decodedJWT.getSubject();
+				User user = userService.getUser(username);
+				String accessToken = JWT.create()
+						.withSubject(user.getUsername())
+						.withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
+						.withIssuer(request.getRequestURI())
+						.withClaim("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+						.sign(algorithm);
+				// 	Để 2 token khác nhau
+				Map<String, String> tokens = new HashMap<>();
+				tokens.put("access_token", accessToken);
+				tokens.put("refresh_token", refreshToken);
+				response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+				new ObjectMapper().writeValue(response.getOutputStream(), tokens);
+			} catch (Exception e) {
+				response.setHeader("error", e.getMessage());
+				response.setStatus(HttpStatus.FORBIDDEN.value());
+				//	response.sendError(HttpStatus.FORBIDDEN.value());
+				Map<String, String> error = new HashMap<>();
+				error.put("error_message", e.getMessage());
+				response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+				new ObjectMapper().writeValue(response.getOutputStream(), error);
+			}
+		} else {
+			throw new RuntimeException("Refresh token is missing");
+		}
 	}
 	...
 }

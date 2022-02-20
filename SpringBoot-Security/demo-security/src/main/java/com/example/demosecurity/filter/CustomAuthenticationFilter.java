@@ -65,6 +65,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 				.sign(algorithm);
 		//	response.setHeader("access_token", accessToken);
 		//	response.setHeader("refresh_token", refreshToken);
+		// 	Để 2 token khác nhau
 		Map<String, String> tokens = new HashMap<>();
 		tokens.put("access_token", accessToken);
 		tokens.put("refresh_token", refreshToken);
