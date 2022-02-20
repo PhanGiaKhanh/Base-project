@@ -1,0 +1,97 @@
+https://www.youtube.com/watch?v=VVn9OG9nfH0&t=360s
+
+https://solveforums.msomimaktaba.com/threads/solved-issue-with-spring-security-with-jwt-token-class-java-lang-string-cannot-be-cast-to-class-org-springframework-security-core-userdetails-user.238968/
+-----------------------------------------------B1-------------------------------------------------------
+@SpringBootApplication
+public class DemoSecurityApplication {
+	...
+	@Bean
+	PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+	...
+}
+-----------------------------------------------B2-------------------------------------------------------
+public class UserServiceImpl implements UserService, UserDetailsService {
+	...
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		User user = userRepo.findByUsername(username);
+		if (user == null) {
+			System.err.println("User not found inn the database");
+			throw new UsernameNotFoundException("User not found inn the database");
+		} else {
+			System.err.println("User found inn the database" + username);
+		}
+		Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+		user.getRoles().forEach(role -> 
+			authorities.add(new SimpleGrantedAuthority(role.getName()))
+		);
+		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
+	}
+	...
+
+}
+-----------------------------------------------B3-------------------------------------------------------
+
+public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+	private final AuthenticationManager authenticationManager;
+	
+	public CustomAuthenticationFilter(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
+	}
+
+	@Override
+	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+			throws AuthenticationException {
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+		//	log.inf("Username is: {}", username);
+		//	log.inf("Password is: {}", password);
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+		return authenticationManager.authenticate(authenticationToken);
+	}
+	
+	// JWT
+	@Override
+	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
+			Authentication authentication) throws IOException, ServletException {
+		User user = (User) authentication.getPrincipal();
+		Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+		String accessToken = JWT.create()
+				.withSubject(user.getUsername())
+				.withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
+				.withIssuer(request.getRequestURI())
+				.withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+				.sign(algorithm);
+		String refreshToken = JWT.create()
+				.withSubject(user.getUsername())
+				.withExpiresAt(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
+				.withIssuer(request.getRequestURI())
+				.sign(algorithm);
+		response.setHeader("access_token", accessToken);
+		response.setHeader("refresh_token", refreshToken);
+	}
+}
+
+-----------------------------------------------B4-------------------------------------------------------
+<!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
+<dependency>
+    <groupId>com.auth0</groupId>
+    <artifactId>java-jwt</artifactId>
+    <version>3.18.3</version>
+</dependency>
+
+-----------------------------------------------B5-------------------------------------------------------
+public class UserServiceImpl implements UserService, UserDetailsService {
+	...
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	...
+	@Override
+	public User saveUser(User user) {
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		return userRepo.save(user);
+	}
+	...
+}
