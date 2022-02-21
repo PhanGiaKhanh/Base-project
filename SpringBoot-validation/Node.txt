@@ -1,4 +1,4 @@
--------------------------------------------------------B1-------------------------------------------------------
+﻿-------------------------------------------------------B1-------------------------------------------------------
 public class UserDto {
 	private long id;
 
@@ -38,17 +38,115 @@ public class UserController {
 	}
 }
 -------------------------------------------------------B3-------------------------------------------------------
+## Custom validation handler
 @ControllerAdvice
 public class ValidationHandler extends ResponseEntityExceptionHandler {
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		Map<String, String> errors = new HashMap<>();
-		ex.getBindingResult().getAllErrors().forEach(error -> {
-			String fieldName = ((FieldError) error).getField();
-			String message = error.getDefaultMessage();
-			errors.put(fieldName, message);
-		});
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+	Map<String, Object> body = new LinkedHashMap<>();
+        	body.put("timestamp", new Date());
+        	body.put("status", status.value());
+
+        	//Get all errors
+        	List<String> errors = ex.getBindingResult()
+                			.getFieldErrors()
+                			.stream()
+                			// .map(x -> x.getDefaultMessage())  <=>
+                			.map(DefaultMessageSourceResolvable::getDefaultMessage)
+                			.collect(Collectors.toList());
+
+        	body.put("errors", errors);
+
+        	return new ResponseEntity<>(body, headers, status);
 	}
 }
+-------------------------------------------------------B4-------------------------------------------------------
+public class UserDto {
+	private long id;
+
+	// user name should not be null or empty
+	// user name should have at least 2 characters
+	@NotEmpty
+	@Size(min = 2, message = "user name should have at least 2 characters")
+	private String name;
+
+	// email should be a valid email format
+	// email should be null or empty
+	@NotEmpty
+	@Email
+	private String email;
+
+	// password should not be null or empty
+	// password should have at least 6 characters
+	@NotEmpty
+	@Size(min = 6, message = "password should have at least 6 characters")
+	private String password;
+	@ValidAge
+//	@Min(value = 18, message = "must be greater or equal to 18")
+	@NotNull(message = "{notnull.age}")
+	private Integer age;
+
+//	@NotNull(message = "birthday is required field")
+//	@DateTimeFormat(pattern = "MM-dd-yyyy")
+	private LocalDate birthday;
+	...
+}
+
+-------------------------------------------------------B5-------------------------------------------------------
+## Custom Valid
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import javax.validation.Constraint;
+import javax.validation.Payload;
+
+@Target(ElementType.FIELD) // Định nghĩa phạm vi annotation for Age / TYPE: class, interface, enum,
+							// annotation
+@Retention(RetentionPolicy.RUNTIME) // Mức độ tồn tại / RUNTIME: compiler
+@Constraint(validatedBy = AgeValidation.class) // Xác định valid and invalid
+@Documented
+public @interface ValidAge {
+	// String message() default "You don't enough age";
+	String message() default "{age.error.message}";
+
+	Class<?>[] groups() default {};
+
+	Class<? extends Payload>[] payload() default {};
+}
+
+-------------------------------------------------------B6-------------------------------------------------------
+public class AgeValidation implements ConstraintValidator<ValidAge, Integer>{
+	@Override
+	public boolean isValid(Integer age, ConstraintValidatorContext context) {
+		return age >= 18;
+	}
+}
+
+-------------------------------------------------------B7-------------------------------------------------------
+@Configuration
+public class CustomMessageSourceConfiguration {
+	@Bean
+	public MessageSource messageSource() {
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+		messageSource.setBasename("classpath:messages");  //<messages>: name properties
+		messageSource.setDefaultEncoding("UTF-8");
+		return messageSource;
+	}
+
+	@Bean
+	public LocalValidatorFactoryBean getValidator() {
+		LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
+		bean.setValidationMessageSource(messageSource());
+		return bean;
+	}
+}
+
+-------------------------------------------------------B8-------------------------------------------------------
+Create messages.properties
+Add
+age.error.message=Age and Birthday doesn't match in properties
+
