@@ -1,0 +1,54 @@
+-------------------------------------------------------B1-------------------------------------------------------
+public class UserDto {
+	private long id;
+
+	@NotEmpty
+	@Size(min = 2, message = "user name should have at least 2 characters")
+	private String name;
+'
+	@NotEmpty
+	@Email
+	private String email;
+
+	@NotEmpty
+	@Size(min = 6, message = "password should have at least 6 characters")
+	private String password;
+
+	@Min(value = 18, message = "must be greater or equal to 18")
+	@NotNull(message = "{notnull.age}")
+	private Integer age;
+
+	@NotNull(message = "birthday is required field")
+	@DateTimeFormat(pattern = "MM-dd-yyyy")
+	private LocalDate birthday;
+	....
+}
+-------------------------------------------------------B2-------------------------------------------------------
+@RestController
+@RequestMapping("/api/v1/")
+public class UserController {
+	@Autowired
+	private UserService userService;
+	
+	@PostMapping("users")
+	public ResponseEntity<User> createUser(@Valid @RequestBody UserDto userDto) {
+		User user = new User();
+		BeanUtils.copyProperties(userDto, user);
+		return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(user));
+	}
+}
+-------------------------------------------------------B3-------------------------------------------------------
+@ControllerAdvice
+public class ValidationHandler extends ResponseEntityExceptionHandler {
+	@Override
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+			HttpHeaders headers, HttpStatus status, WebRequest request) {
+		Map<String, String> errors = new HashMap<>();
+		ex.getBindingResult().getAllErrors().forEach(error -> {
+			String fieldName = ((FieldError) error).getField();
+			String message = error.getDefaultMessage();
+			errors.put(fieldName, message);
+		});
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+	}
+}
