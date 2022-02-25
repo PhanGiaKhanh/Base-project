@@ -33,11 +33,11 @@ public class AppUser implements UserDetails{
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "student_sequence")
 	private Long id;
-	private String name;
-	private String username;
-	@Enumerated(EnumType.STRING)
+	private String firstName;
+	private String lastName;
 	private String email;
 	private String password;
+	@Enumerated(EnumType.STRING)
 	private AppUserRole appUserRole;
 	private Boolean locked;
 	private Boolean enabled;
@@ -46,15 +46,12 @@ public class AppUser implements UserDetails{
 	public AppUser() {
 	}
 
-	public AppUser(String name, String username, String email, String password, AppUserRole appUserRole, Boolean locked,
-			Boolean enabled) {
-		this.name = name;
-		this.username = username;
+	public AppUser(String firstName, String lastName, String email, String password, AppUserRole appUserRole) {
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
 		this.appUserRole = appUserRole;
-		this.locked = locked;
-		this.enabled = enabled;
 	}
 
 	@Override
@@ -70,7 +67,7 @@ public class AppUser implements UserDetails{
 
 	@Override
 	public String getUsername() {
-		return username;
+		return email;
 	}
 
 	@Override
@@ -101,16 +98,20 @@ public class AppUser implements UserDetails{
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
-	public String getEmail() {
-		return email;
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	public void setEmail(String email) {
@@ -133,20 +134,20 @@ public class AppUser implements UserDetails{
 		this.locked = locked;
 	}
 
-	public Boolean getEnabled() {
-		return enabled;
-	}
-
 	public void setEnabled(Boolean enabled) {
 		this.enabled = enabled;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	@Override
+	public String toString() {
+		return "AppUser [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email
+				+ ", password=" + password + ", appUserRole=" + appUserRole + ", locked=" + locked + ", enabled="
+				+ enabled + "]";
 	}
 	
 }
