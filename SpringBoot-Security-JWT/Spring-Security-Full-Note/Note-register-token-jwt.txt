@@ -183,3 +183,49 @@ public class UserServiceImpl implements UserService{
 		return "valid";
 	}
 }
+----------------------------------------------------B8------------------------------------------------------- // Re-generator and new verification code submission
+--------------------
+UPDATE: 	RegistrationController 
+--------------------
+
+@Slf4j
+@RestController
+public class RegistrationController {
+	...
+	//	Re-generator and new verification code submission
+	@GetMapping("/resendVerifyToken")
+	public String resendVerificationToken(@RequestParam("token") String oldToken, HttpServletRequest request) {
+		VerificationToken verificationToken = userService.generateNewVerificationToken(oldToken);
+		User user = verificationToken.getUser();
+		resendVerificationTokenMail(user, applicationUrl(request), verificationToken.getToken());
+		return "Verication link Sent";
+	}
+	...
+}
+
+--------------------
+UPDATE: 	RegistrationController 
+--------------------
+@Service
+public class UserServiceImpl implements UserService{
+	...
+	@Override
+	public VerificationToken generateNewVerificationToken(String oldToken) {
+		VerificationToken verificationToken = verificationTokenRepository.findByToken(oldToken);
+		verificationToken.setToken(UUID.randomUUID().toString());
+		return verificationTokenRepository.save(verificationToken);
+	}
+	...
+}
+
+
+--------------------
+UPDATE: 	RegistrationController 
+--------------------
+@EnableWebSecurity
+public class WebSecurityConfig {
+	...
+	private static final String[] WHITE_LIST_URLS = { "/hello", "/register", "/verifyRegistration",
+			"/resendVerifyToken" };
+	...
+}

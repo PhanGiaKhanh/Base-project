@@ -1,6 +1,7 @@
 package com.demo.springsecurityfull.service;
 
 import com.demo.springsecurityfull.entity.User;
+import com.demo.springsecurityfull.entity.VerificationToken;
 import com.demo.springsecurityfull.model.UserModel;
 
 /**
@@ -14,5 +15,7 @@ public interface UserService {
 	void saveVerificationTokenForUser(String token, User user);
 
 	String validateVerificatoinToken(String token);
+
+	VerificationToken generateNewVerificationToken(String oldToken);
 
 }
