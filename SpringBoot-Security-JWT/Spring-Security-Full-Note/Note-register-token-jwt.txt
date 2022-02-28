@@ -1,0 +1,185 @@
+﻿https://www.youtube.com/watch?v=tWcqSIQr6Ks
+
+==================================REGISTRATION======================================
+----------------------------------------------------B1--------------------------------------------------------
+application.yml
+------------------------------------
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/spring_security_full
+    username: root
+    password: 12345678
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+----------------------------------------------------B2--------------------------------------------------------
+Create: 	entity/User
+	model/UserModel
+	repository/UserRepo
+	service/UserService + UserServiceImpl
+
+----------------------------------------------------B3--------------------------------------------------------
+Create: 	config/WebSecurityConfig.java
+@Configuration
+@EnableWebSecurity
+public class WebSecurityConfig  {
+
+	@Bean
+	private PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder(11); // độ bảo mật là 11 số
+	}
+}
+----------------------------------------------------B4--------------------------------------------------------
+@Service
+public class UserServiceImpl implements UserService{
+	@Autowired
+	private UserRepository userRepository;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
+	@Override
+	public User registerUser(UserModel userModel) {
+		User user = new User();
+		user.setEmail(userModel.getEmail());
+		user.setFirstName(userModel.getFirstName());
+		user.setLastName(userModel.getLastName());
+		user.setRole("USER");
+		user.setPassword(passwordEncoder.encode(userModel.getPassword()));
+		return userRepository.save(user);
+	}
+}
+----------------------------------------------------B5-------------------------------------------------------
+@RestController
+public class RegistrationController {
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+	private ApplicationEventPublisher publisher; 			// Listen event to send Email and save Token in DB
+	
+	@PostMapping("/register")
+	public String registerUser(@RequestBody UserModel userModel) {
+		User user = userService.registerUser(userModel);
+		publisher.publishEvent(new RegistrationCompleteEvent(user, "url"));
+		return "success";
+	}
+}
+--------------------
+Create:	event / RegistrationCompleteEvent
+	event / listener / RegistrationCompleteEventListener
+	entity / VerificationToken  					// lưu vào Database, có giới hạn thời gian
+--------------------
+Update: 	service/ impl / UserServiceImpl
+--------------------
+@Service
+public class UserServiceImpl implements UserService{
+	...
+	@Autowired
+	private VerificationTokenRepository verificationTokenRepository;
+	...
+	@Override
+	public User registerUser(UserModel userModel) {
+		User user = new User();
+		user.setEmail(userModel.getEmail());
+		user.setFirstName(userModel.getFirstName());
+		user.setLastName(userModel.getLastName());
+		user.setRole("USER");
+		user.setPassword(passwordEncoder.encode(userModel.getPassword()));
+		return userRepository.save(user);
+	}
+
+	@Override
+	public void saveVerificationTokenForUser(String token, User user) {
+		VerificationToken verificationToken = new VerificationToken(token, user);
+		verificationTokenRepository.save(verificationToken);
+	}
+}
+--------------------
+Update: 	controller / RegistrationController 
+--------------------
+@RestController
+public class RegistrationController {
+	...
+	@Autowired
+	private ApplicationEventPublisher publisher;
+	
+	@PostMapping("/register")
+	public String registerUser(@RequestBody UserModel userModel, HttpServletRequest request) {
+		User user = userService.registerUser(userModel);
+		publisher.publishEvent(new RegistrationCompleteEvent(user, applicationUrl(request)));
+		return "success";
+	}
+
+	private String applicationUrl(HttpServletRequest request) {
+		return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+	}
+}
+----------------------------------------------------B6--------------------------------------------------------// bỏ security với những trang /hello, /register
+--------------------
+UPDATE: 	WebSecurityConfig 
+--------------------
+@EnableWebSecurity
+public class WebSecurityConfig {
+
+	private static final String[] WHITE_LIST_URLS = { "/hello", "/register" };
+	...
+	@Bean							
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.cors().and().csrf().disable().authorizeHttpRequests().antMatchers(WHITE_LIST_URLS).permitAll();
+		return http.build();
+	}
+}
+----------------------------------------------------B7------------------------------------------------------- // Check Token 
+--------------------
+UPDATE: 	RegistrationController 
+--------------------
+@RestController
+public class RegistrationController {
+	...
+	@GetMapping("/verifyRegistration")
+	public String verifyRegistration(@RequestParam("token") String token) {
+		String result = userService.validateVerificatoinToken(token);
+		if (result.equalsIgnoreCase("valid")) {
+			return "User Verifies Successfully";
+		}
+		return "Bad User";
+	}
+	...
+}
+--------------------
+UPDATE: 	UserService
+--------------------
+@Service
+public class UserServiceImpl implements UserService{
+	...
+	@Override
+	public String validateVerificatoinToken(String token) {
+		VerificationToken verificationToken = verificationTokenRepository.findByToken(token);
+		
+		// 	Check Token exists in DB
+		if (verificationToken == null) {
+			return "invalid";
+		}
+	
+		User user = verificationToken.getUser();
+		Calendar cal = Calendar.getInstance();
+		
+		// 	Check time limit Token
+		if (verificationToken.getExpirationTime().getTime() - cal.getTime().getTime() <= 0) {
+			verificationTokenRepository.delete(verificationToken);
+			return "expired";
+		}
+		
+		// 	Save user checked Token
+		user.setEnabled(true);
+		userRepository.save(user);
+		return "valid";
+	}
+}
