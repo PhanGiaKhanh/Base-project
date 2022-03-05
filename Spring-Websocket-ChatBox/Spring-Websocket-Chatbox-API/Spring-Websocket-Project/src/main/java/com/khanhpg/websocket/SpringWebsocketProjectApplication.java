@@ -1,0 +1,13 @@
+package com.khanhpg.websocket;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SpringWebsocketProjectApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringWebsocketProjectApplication.class, args);
+	}
+
+}
