@@ -5,19 +5,73 @@ https://www.youtube.com/watch?v=4Hyv4M1kFeM
 -----------------------------------------------
 pom.xml
 -----------------------------------------------
-
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-websocket</artifactId>
+</dependency>
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-reactor-netty</artifactId>
+</dependency>
 ----------------------------------------------------B2-------------------------------------------------------------------------------------
-
+Config
 -----------------------------------------------
-
+WebsocketConfig
 -----------------------------------------------
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
+	@Override
+	public void registerStompEndpoints(StompEndpointRegistry registry) {
+		registry.addEndpoint("/javatechie").withSockJS();
+	}
+
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry registry) {
+		registry.enableSimpleBroker("/topic");
+		registry.setApplicationDestinationPrefixes("/app");
+	}
+}
 ----------------------------------------------------B3-------------------------------------------------------------------------------------
-
+Model
 -----------------------------------------------
-
+ChatMessage
 -----------------------------------------------
+@Getter
+@Setter
+public class ChatMessage {
+	private String content;
+	private String sender;
+	private MessageType messageType;
+
+	public enum MessageType {
+		CHAT, LEAVE, JOIN
+	}
+}
 ----------------------------------------------------B4-------------------------------------------------------------------------------------
-
+Controller
 -----------------------------------------------
+ChatBoxController
+-----------------------------------------------
+@Controller
+public class ChatBoxController {
+	
+	@MessageMapping("/chat.register")
+	@SendTo("/topic/public")
+	public ChatMessage register(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
+		Object check = headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+		return chatMessage;
+	}
+	
+	@MessageMapping("/chat.send")
+	@SendTo("/topic/public")
+	public ChatMessage sendMessage (@Payload ChatMessage chatMessage) {
+		return chatMessage;
+	}
+}
 
+----------------------------------------------------B5-------------------------------------------------------------------------------------
+src/main/resouces/static
+-----------------------------------------------
+html/css/js
 -----------------------------------------------
