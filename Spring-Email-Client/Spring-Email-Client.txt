@@ -1,0 +1,70 @@
+﻿https://www.youtube.com/watch?v=kyL0m9y1n0A
+
+------------------------------------------B0---------------------------------------------------
+Setting Email
+-----------------------------------------
+Email 
+-----------------------------------------
+Email > Setting >  All Settings >> Tài khoản và Nhập >> Các cài đặt khác cho tài khoản Google
+Bảo mật  > Xác minh 2 bước > Bật
+Bảo mật  > Mật khẩu ứng dụng > Other > Nhập name > Lấy password
+------------------------------------------B1---------------------------------------------------
+Config connect Email
+-----------------------------------------
+application.properties
+-----------------------------------------
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=<email_send>
+spring.mail.password=<password_email_send>
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+------------------------------------------B2---------------------------------------------------
+Code send email
+-----------------------------------------
+EmailSenderService
+-----------------------------------------
+@Slf4j
+@Service
+public class EmailSenderService {
+	@Autowired
+	private JavaMailSender mailSender;
+	
+	public void sendSimpleEmail(String toEmail, String body, String subject) {
+		 SimpleMailMessage msg = new SimpleMailMessage();
+		 msg.setFrom("khanhpgcode@gmail.com");
+		 msg.setTo(toEmail);
+		 msg.setText(body);
+		 msg.setSubject(subject);
+		 // send email
+		 mailSender.send(msg);
+		 log.info("Mail send...");
+	}
+}
+
+------------------------------------------B3---------------------------------------------------
+Run send email
+-----------------------------------------
+SpringEmailClientApplication
+-----------------------------------------
+@SpringBootApplication
+public class SpringEmailClientApplication {
+	@Autowired
+	private EmailSenderService emailSenderService;
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringEmailClientApplication.class, args);
+	}
+	
+	@EventListener(ApplicationReadyEvent.class)
+	public void triggerMail() throws MessagingException {
+		// emailSenderService.sendSimpleEmail("khanhphan900@gmail.com", 
+						// "This is the Eemail Body...", 
+						//"This is the Email Subject");
+		emailSenderService.sendEmailWithAttachment("khanhphan900@gmail.com",
+				"This is the Eemail Body attachment...", 
+				"This is the Email Subject attachment", 
+				"D:\\img\\DOUGNUTS\\DOUGNUTS_1.jpg");
+	}
+}
